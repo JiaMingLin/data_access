@@ -126,7 +126,6 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:hls:DoCompute:1.0\
 xilinx.com:ip:proc_sys_reset:5.0\
-xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:zynq_ultra_ps_e:3.2\
 "
 
@@ -197,26 +196,34 @@ proc create_root_design { parentCell } {
   # Create instance: DoCompute_0, and set properties
   set DoCompute_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:DoCompute:1.0 DoCompute_0 ]
 
+  # Create instance: DoCompute_1, and set properties
+  set DoCompute_1 [ create_bd_cell -type ip -vlnv xilinx.com:hls:DoCompute:1.0 DoCompute_1 ]
+
+  # Create instance: DoCompute_2, and set properties
+  set DoCompute_2 [ create_bd_cell -type ip -vlnv xilinx.com:hls:DoCompute:1.0 DoCompute_2 ]
+
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_MI {3} \
  ] $axi_interconnect_0
+
+  # Create instance: axi_interconnect_1, and set properties
+  set axi_interconnect_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_1 ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {3} \
+ ] $axi_interconnect_1
+
+  # Create instance: axi_interconnect_2, and set properties
+  set axi_interconnect_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_2 ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {3} \
+ ] $axi_interconnect_2
 
   # Create instance: proc_sys_reset_0, and set properties
   set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
-
-  # Create instance: smartconnect_0, and set properties
-  set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
-  set_property -dict [ list \
-   CONFIG.NUM_SI {1} \
- ] $smartconnect_0
-
-  # Create instance: smartconnect_1, and set properties
-  set smartconnect_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_1 ]
-  set_property -dict [ list \
-   CONFIG.NUM_SI {1} \
- ] $smartconnect_1
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
   set zynq_ultra_ps_e_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.2 zynq_ultra_ps_e_0 ]
@@ -744,16 +751,22 @@ proc create_root_design { parentCell } {
  ] $zynq_ultra_ps_e_0
 
   # Create interface connections
-  connect_bd_intf_net -intf_net DoCompute_0_m_axi_INPUT_r [get_bd_intf_pins DoCompute_0/m_axi_INPUT_r] [get_bd_intf_pins smartconnect_0/S00_AXI]
-  connect_bd_intf_net -intf_net DoCompute_0_m_axi_OUTPUT_r [get_bd_intf_pins DoCompute_0/m_axi_OUTPUT_r] [get_bd_intf_pins smartconnect_1/S00_AXI]
+  connect_bd_intf_net -intf_net DoCompute_0_m_axi_INPUT_r [get_bd_intf_pins DoCompute_0/m_axi_INPUT_r] [get_bd_intf_pins axi_interconnect_1/S00_AXI]
+  connect_bd_intf_net -intf_net DoCompute_0_m_axi_OUTPUT_r [get_bd_intf_pins DoCompute_0/m_axi_OUTPUT_r] [get_bd_intf_pins axi_interconnect_2/S00_AXI]
+  connect_bd_intf_net -intf_net DoCompute_1_m_axi_INPUT_r [get_bd_intf_pins DoCompute_1/m_axi_INPUT_r] [get_bd_intf_pins axi_interconnect_1/S01_AXI]
+  connect_bd_intf_net -intf_net DoCompute_1_m_axi_OUTPUT_r [get_bd_intf_pins DoCompute_1/m_axi_OUTPUT_r] [get_bd_intf_pins axi_interconnect_2/S01_AXI]
+  connect_bd_intf_net -intf_net DoCompute_2_m_axi_INPUT_r [get_bd_intf_pins DoCompute_2/m_axi_INPUT_r] [get_bd_intf_pins axi_interconnect_1/S02_AXI]
+  connect_bd_intf_net -intf_net DoCompute_2_m_axi_OUTPUT_r [get_bd_intf_pins DoCompute_2/m_axi_OUTPUT_r] [get_bd_intf_pins axi_interconnect_2/S02_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_0_M00_AXI [get_bd_intf_pins DoCompute_0/s_axi_AXILiteS] [get_bd_intf_pins axi_interconnect_0/M00_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins smartconnect_0/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP0_FPD]
-  connect_bd_intf_net -intf_net smartconnect_1_M00_AXI [get_bd_intf_pins smartconnect_1/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP1_FPD]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M01_AXI [get_bd_intf_pins DoCompute_1/s_axi_AXILiteS] [get_bd_intf_pins axi_interconnect_0/M01_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M02_AXI [get_bd_intf_pins DoCompute_2/s_axi_AXILiteS] [get_bd_intf_pins axi_interconnect_0/M02_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_1_M00_AXI [get_bd_intf_pins axi_interconnect_1/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP0_FPD]
+  connect_bd_intf_net -intf_net axi_interconnect_2_M00_AXI [get_bd_intf_pins axi_interconnect_2/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP1_FPD]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins axi_interconnect_0/S00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD]
 
   # Create port connections
-  connect_bd_net -net S00_ACLK_1 [get_bd_pins DoCompute_0/ap_clk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins smartconnect_0/aclk] [get_bd_pins smartconnect_1/aclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihp0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/saxihp1_fpd_aclk]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins DoCompute_0/ap_rst_n] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins smartconnect_0/aresetn] [get_bd_pins smartconnect_1/aresetn]
+  connect_bd_net -net ARESETN_1 [get_bd_pins DoCompute_0/ap_rst_n] [get_bd_pins DoCompute_1/ap_rst_n] [get_bd_pins DoCompute_2/ap_rst_n] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/M01_ARESETN] [get_bd_pins axi_interconnect_0/M02_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_1/ARESETN] [get_bd_pins axi_interconnect_1/M00_ARESETN] [get_bd_pins axi_interconnect_1/S00_ARESETN] [get_bd_pins axi_interconnect_1/S01_ARESETN] [get_bd_pins axi_interconnect_1/S02_ARESETN] [get_bd_pins axi_interconnect_2/ARESETN] [get_bd_pins axi_interconnect_2/M00_ARESETN] [get_bd_pins axi_interconnect_2/S00_ARESETN] [get_bd_pins axi_interconnect_2/S01_ARESETN] [get_bd_pins axi_interconnect_2/S02_ARESETN] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
+  connect_bd_net -net Net [get_bd_pins DoCompute_0/ap_clk] [get_bd_pins DoCompute_1/ap_clk] [get_bd_pins DoCompute_2/ap_clk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_interconnect_1/S01_ACLK] [get_bd_pins axi_interconnect_1/S02_ACLK] [get_bd_pins axi_interconnect_2/ACLK] [get_bd_pins axi_interconnect_2/M00_ACLK] [get_bd_pins axi_interconnect_2/S00_ACLK] [get_bd_pins axi_interconnect_2/S01_ACLK] [get_bd_pins axi_interconnect_2/S02_ACLK] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihp0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/saxihp1_fpd_aclk]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
   # Create address segments
@@ -761,7 +774,17 @@ proc create_root_design { parentCell } {
   create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_0/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_QSPI] SEG_zynq_ultra_ps_e_0_HP0_QSPI
   create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces DoCompute_0/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_DDR_LOW] SEG_zynq_ultra_ps_e_0_HP1_DDR_LOW
   create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_0/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_QSPI] SEG_zynq_ultra_ps_e_0_HP1_QSPI
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_DDR_LOW] SEG_zynq_ultra_ps_e_0_HP0_DDR_LOW
+  create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_QSPI] SEG_zynq_ultra_ps_e_0_HP0_QSPI
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_DDR_LOW] SEG_zynq_ultra_ps_e_0_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_QSPI] SEG_zynq_ultra_ps_e_0_HP1_QSPI
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_DDR_LOW] SEG_zynq_ultra_ps_e_0_HP0_DDR_LOW
+  create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_QSPI] SEG_zynq_ultra_ps_e_0_HP0_QSPI
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_DDR_LOW] SEG_zynq_ultra_ps_e_0_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x20000000 -offset 0xC0000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_QSPI] SEG_zynq_ultra_ps_e_0_HP1_QSPI
   create_bd_addr_seg -range 0x00010000 -offset 0xA0000000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs DoCompute_0/s_axi_AXILiteS/Reg] SEG_DoCompute_0_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0xA0010000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs DoCompute_1/s_axi_AXILiteS/Reg] SEG_DoCompute_1_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0xA0020000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs DoCompute_2/s_axi_AXILiteS/Reg] SEG_DoCompute_2_Reg
 
   # Exclude Address Segments
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_0/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM
@@ -769,6 +792,18 @@ proc create_root_design { parentCell } {
 
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_0/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM
   exclude_bd_addr_seg [get_bd_addr_segs DoCompute_0/Data_m_axi_OUTPUT_r/SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM]
+
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM
+  exclude_bd_addr_seg [get_bd_addr_segs DoCompute_1/Data_m_axi_INPUT_r/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
+
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_1/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM
+  exclude_bd_addr_seg [get_bd_addr_segs DoCompute_1/Data_m_axi_OUTPUT_r/SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM]
+
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_INPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP2/HP0_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM
+  exclude_bd_addr_seg [get_bd_addr_segs DoCompute_2/Data_m_axi_INPUT_r/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
+
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces DoCompute_2/Data_m_axi_OUTPUT_r] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP3/HP1_LPS_OCM] SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM
+  exclude_bd_addr_seg [get_bd_addr_segs DoCompute_2/Data_m_axi_OUTPUT_r/SEG_zynq_ultra_ps_e_0_HP1_LPS_OCM]
 
 
 

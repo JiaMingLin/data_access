@@ -5,7 +5,7 @@ using namespace std;
 
 #define TEST_LENGTH 2048
 
-#define MAX_LENGTH 5120
+#define MAX_LENGTH 2048
 #define EXTERNAL_DATA_WIDTH 512
 #define	INTERNAL_DATA_WIDTH 512
 #define PREC 8
