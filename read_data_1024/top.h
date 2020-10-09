@@ -3,11 +3,11 @@
 
 using namespace std;
 
-#define TEST_LENGTH 2048
+#define TEST_LENGTH 1024
 
-#define MAX_LENGTH 2048
-#define EXTERNAL_DATA_WIDTH 512
-#define	INTERNAL_DATA_WIDTH 512
+#define MAX_LENGTH 1024
+#define EXTERNAL_DATA_WIDTH 128
+#define	INTERNAL_DATA_WIDTH 128
 #define PREC 8
 
 typedef ap_uint<PREC> data_t;
